@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:wc="http://schemas.android.com/apk/res/ch.corten.aha.worldclock" >
+    xmlns:wc="http://schemas.android.com/apk/res-auto" >
     <PreferenceCategory android:title="@string/general">
         <ch.corten.aha.preference.WeatherApiPreference
             android:key="@string/WeatherApiPreference_key"
