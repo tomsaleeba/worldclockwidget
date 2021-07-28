@@ -16,6 +16,7 @@
     <string name="display_in_widget">Display in widget</string>
     <string name="description">Description</string>
     <string name="refresh">Refresh</string>
+    <string name="abs__action_menu_overflow_description">More options</string>
 
     <string-array name="speed_units">
         <item name="kmh">km/h</item>

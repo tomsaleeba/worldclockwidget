@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
         android:id="@+id/menu_add"
         android:icon="@drawable/ic_menu_add"
-        android:showAsAction="ifRoom"
-        android:title="@string/add"/>
+        android:title="@string/add"
+        android:showAsAction="ifRoom|collapseActionView" />
     <item
         android:id="@+id/menu_refresh"
         android:icon="@drawable/ic_menu_refresh"
-        android:showAsAction="always"
-        android:title="@string/refresh"/>
+        android:title="@string/refresh"
+        android:showAsAction="ifRoom|collapseActionView" />
     <item
         android:id="@+id/menu_preferences"
         android:icon="@drawable/ic_menu_preferences"
         android:menuCategory="secondary"
-        android:showAsAction="ifRoom"
-        android:title="@string/preferences"/>
+        android:title="@string/preferences"
+        android:showAsAction="ifRoom|collapseActionView" />
 
 </menu>

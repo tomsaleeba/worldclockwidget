@@ -16,18 +16,19 @@
 
 package ch.corten.aha.worldclock;
 
-import com.actionbarsherlock.app.SherlockPreferenceActivity;
-import com.actionbarsherlock.view.MenuItem;
-
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
+import android.view.MenuItem;
 
-public class WorldClockPreferenceActivity extends SherlockPreferenceActivity {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class WorldClockPreferenceActivity extends PreferenceActivity {
     @SuppressWarnings("deprecation")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle(R.string.world_clock_settings);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+       //this.getActionBar().setDisplayHomeAsUpEnabled(true);
         addPreferencesFromResource(R.xml.preferences);
     }
 

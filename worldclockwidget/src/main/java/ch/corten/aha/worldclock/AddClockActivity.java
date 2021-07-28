@@ -20,25 +20,26 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v4.widget.CursorAdapter;
-import android.support.v4.widget.ResourceCursorAdapter;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.ListFragment;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
+import androidx.cursoradapter.widget.CursorAdapter;
+import androidx.cursoradapter.widget.ResourceCursorAdapter;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.app.SherlockListFragment;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.widget.SearchView;
-import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 
 import net.time4j.Moment;
 import net.time4j.tz.Timezone;
@@ -47,12 +48,14 @@ import ch.corten.aha.utils.PlatformClock;
 import ch.corten.aha.worldclock.provider.WorldClock;
 import ch.corten.aha.worldclock.provider.WorldClock.Cities;
 
-public class AddClockActivity extends SherlockFragmentActivity {
+public class AddClockActivity extends AppCompatActivity {
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle(R.string.add_city);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_launcher);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         FragmentManager fm = getSupportFragmentManager();
@@ -66,13 +69,12 @@ public class AddClockActivity extends SherlockFragmentActivity {
     @Override
     public boolean onSearchRequested() {
         FragmentManager fm = getSupportFragmentManager();
-        TimeZoneListFragment fragment = (TimeZoneListFragment) fm
-                .findFragmentById(android.R.id.content);
+        TimeZoneListFragment fragment = (TimeZoneListFragment) fm.findFragmentById(android.R.id.content);
         fragment.startSearch();
         return true;
     }
 
-    public static class TimeZoneListFragment extends SherlockListFragment implements
+    public static class TimeZoneListFragment extends ListFragment implements
     LoaderManager.LoaderCallbacks<Cursor> {
         private CursorAdapter mAdapter;
         private SearchView mSearchView;
@@ -153,7 +155,7 @@ public class AddClockActivity extends SherlockFragmentActivity {
             inflater.inflate(R.menu.timezone_list, menu);
             MenuItem searchItem = menu.findItem(R.id.menu_search);
             mSearchView = (SearchView) searchItem.getActionView();
-            mSearchView.setOnQueryTextListener(new OnQueryTextListener() {
+            mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextChange(String newText) {
                     return TimeZoneListFragment.this.onQueryTextChange(newText);

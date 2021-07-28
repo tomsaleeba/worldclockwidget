@@ -27,6 +27,8 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.AppCompatTextView;
+
 import net.time4j.Moment;
 import net.time4j.format.expert.ChronoFormatter;
 import net.time4j.format.expert.PatternType;
@@ -42,7 +44,7 @@ import ch.corten.aha.utils.PlatformClock;
  * FIXME: implement separate views for hours/minutes/seconds, so
  * proportional fonts don't shake rendering
  */
-public class DigitalClock extends TextView implements PauseListener {
+public class DigitalClock extends AppCompatTextView implements PauseListener {
 
     private static final int STATE_DETACHED = 0;
     private static final int STATE_ATTACHED_ACTIVE = 1;
@@ -87,7 +89,7 @@ public class DigitalClock extends TextView implements PauseListener {
     private void initClock(Context context) {
         mFormatChangeObserver = new FormatChangeObserver();
         registerObserver();
-        setFormat();
+      // setFormat  ();
     }
 
     private void registerObserver() {
@@ -172,8 +174,7 @@ public class DigitalClock extends TextView implements PauseListener {
     }
 
     private void setFormat() {
-        mDateFormat =
-                ChronoFormatter.ofMomentPattern(
+        mDateFormat = ChronoFormatter.ofMomentPattern(
                         is24HourMode() ? M24 : M12,
                         PatternType.CLDR,
                         Locale.getDefault(),

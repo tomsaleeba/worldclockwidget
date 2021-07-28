@@ -9,4 +9,5 @@
     <style name="aboutTextStyle">
         <item name="android:gravity">center_horizontal</item>
     </style>
+
 </resources>

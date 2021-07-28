@@ -23,15 +23,26 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.view.ActionMode;
+
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.ListFragment;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 import android.text.format.DateFormat;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -41,13 +52,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
-
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.app.SherlockListFragment;
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 
 import net.time4j.Moment;
 import net.time4j.tz.Timezone;
@@ -64,14 +68,17 @@ import ch.corten.aha.worldclock.provider.WorldClock;
 import ch.corten.aha.worldclock.provider.WorldClock.Clocks;
 import ch.corten.aha.worldclock.provider.WorldClock.Clocks.MoveTarget;
 
-public class WorldClockActivity extends SherlockFragmentActivity {
+public class WorldClockActivity extends FragmentActivity {
     private static final boolean IS_GINGERBREAD = Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD;
 
     private static final int WEATHER_UPDATE_INTERVAL = 900000; // 15 minutes
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getActionBar().setHomeAsUpIndicator(R.drawable.ic_launcher);// set drawable icon
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         FragmentManager fm = getSupportFragmentManager();
         // Create the list fragment and add it as our sole content.
@@ -81,11 +88,11 @@ public class WorldClockActivity extends SherlockFragmentActivity {
         }
     }
 
-    public static class ClockListFragment extends SherlockListFragment implements
+    public static class ClockListFragment extends ListFragment implements
     LoaderManager.LoaderCallbacks<Cursor>, PauseSource {
 
         private CursorAdapter mAdapter;
-        private ActionMode mMode;
+        private android.view.ActionMode mMode;
         private OnSharedPreferenceChangeListener mSpChange;
         private boolean mAutoSortClocks;
         private final List<PauseListener> mListeners = new ArrayList<>();
@@ -120,6 +127,7 @@ public class WorldClockActivity extends SherlockFragmentActivity {
             setListShown(false);
 
             ListView listView = getListView();
+            listView.setBackgroundColor(Color.BLACK);
             setupCabOld(listView);
             registerPreferenceChanged();
 
@@ -127,7 +135,7 @@ public class WorldClockActivity extends SherlockFragmentActivity {
                 // Restore contextual action bar state
                 CharSequence cab = savedInstanceState.getCharSequence(CAB);
                 if (cab != null) {
-                    mMode = getSherlockActivity().startActionMode(new ModeCallback());
+                    mMode = getActivity().startActionMode(new ModeCallback());
                     mMode.setTitle(cab);
                     mMode.invalidate();
                 }
@@ -212,7 +220,7 @@ public class WorldClockActivity extends SherlockFragmentActivity {
 
                     if (checked.length > 0) {
                         if (mMode == null) {
-                            mMode = getSherlockActivity().startActionMode(new ModeCallback());
+                            mMode = getActivity().startActionMode(new ModeCallback());
                         }
                         CharSequence format = getResources().getText(R.string.n_selcted_format);
                         mMode.setTitle(MessageFormat.format(format.toString(), checked.length));
@@ -226,7 +234,7 @@ public class WorldClockActivity extends SherlockFragmentActivity {
             });
         }
 
-        private class ModeCallback implements ActionMode.Callback {
+        private class ModeCallback implements ActionMode.Callback, android.view.ActionMode.Callback {
 
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -285,6 +293,57 @@ public class WorldClockActivity extends SherlockFragmentActivity {
 
             @Override
             public void onDestroyActionMode(ActionMode mode) {
+
+            }
+
+            @Override
+            public boolean onCreateActionMode(android.view.ActionMode mode, Menu menu) {
+                MenuInflater inflater = mode.getMenuInflater();
+                inflater.inflate(R.menu.clock_list_context, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(android.view.ActionMode mode, Menu menu) {
+                MenuItem editItem = menu.findItem(R.id.menu_edit);
+                MenuItem upItem = menu.findItem(R.id.menu_up);
+                MenuItem downItem = menu.findItem(R.id.menu_down);
+                boolean oneSelected = getListView().getCheckedItemIds().length == 1;
+                boolean reorderEnabled = !mAutoSortClocks && oneSelected && getListView().getCount() > 1;
+                boolean changed = setVisible(editItem, oneSelected);
+                changed = changed || setVisible(upItem, reorderEnabled);
+                changed = changed || setVisible(downItem, reorderEnabled);
+                if (changed) {
+                    // fixes entries in the overflow menu
+                    mode.invalidate();
+                }
+                return changed;
+            }
+
+            @Override
+            public boolean onActionItemClicked(android.view.ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_delete:
+                        deleteSelectedItems();
+                        mode.finish();
+                        return true;
+                    case R.id.menu_edit:
+                        editClock();
+                        mode.finish();
+                        return true;
+                    case R.id.menu_up:
+                        moveSelected(MoveTarget.UP);
+                        return true;
+                    case R.id.menu_down:
+                        moveSelected(MoveTarget.DOWN);
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            @Override
+            public void onDestroyActionMode(android.view.ActionMode mode) {
                 for (int i = 0; i < getListAdapter().getCount(); i++) {
                     getListView().setItemChecked(i, false);
                 }
@@ -292,6 +351,7 @@ public class WorldClockActivity extends SherlockFragmentActivity {
                 if (mode == mMode) {
                     mMode = null;
                 }
+
             }
         }
 

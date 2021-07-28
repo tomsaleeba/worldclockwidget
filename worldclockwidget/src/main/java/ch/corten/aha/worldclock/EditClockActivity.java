@@ -13,9 +13,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-
 package ch.corten.aha.worldclock;
 
+import android.app.ActionBar;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -23,7 +23,13 @@ import android.database.CursorIndexOutOfBoundsException;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.ListFragment;
+
 import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,24 +39,20 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-
 import net.time4j.Moment;
 import net.time4j.tz.Timezone;
 
 import ch.corten.aha.utils.PlatformClock;
 import ch.corten.aha.worldclock.provider.WorldClock.Clocks;
 
-public class EditClockActivity extends SherlockFragmentActivity {
+public class EditClockActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActionBar actionBar = getSupportActionBar();
-        LayoutInflater inflator = (LayoutInflater) actionBar
-                .getThemedContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+
+        ActionBar actionBar = this.getActionBar();
+        LayoutInflater inflator = (LayoutInflater) getActionBar().getThemedContext().getSystemService(LAYOUT_INFLATER_SERVICE);
         View customActionBarView = inflator.inflate(R.layout.actionbar_custom_view_done_discard, null);
         customActionBarView.findViewById(R.id.actionbar_discard)
                 .setOnClickListener(new View.OnClickListener() {
@@ -59,20 +61,16 @@ public class EditClockActivity extends SherlockFragmentActivity {
                         finish();
                     }
                 });
-        customActionBarView.findViewById(R.id.actionbar_done)
-                .setOnClickListener(new View.OnClickListener() {
+        customActionBarView.findViewById(R.id.actionbar_done).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         getFragment().done();
                     }
                 });
 
-        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM,
-                ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_TITLE
-                        | ActionBar.DISPLAY_SHOW_HOME);
-        actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
+        actionBar.setDisplayOptions(actionBar.DISPLAY_SHOW_CUSTOM, actionBar.DISPLAY_SHOW_CUSTOM | actionBar.DISPLAY_SHOW_TITLE
+                        | actionBar.DISPLAY_SHOW_HOME);
+        actionBar.setCustomView(customActionBarView, new android.app.ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         FragmentManager fm = getSupportFragmentManager();
         // Create the list fragment and add it as our sole content.
@@ -87,8 +85,8 @@ public class EditClockActivity extends SherlockFragmentActivity {
         return (EditClockFragment) fm.findFragmentById(android.R.id.content);
     }
 
-    public static class EditClockFragment extends SherlockFragment {
-        private static final boolean SANS_ICE_CREAM = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+    public static class EditClockFragment extends Fragment {
+       // private static final boolean SANS_ICE_CREAM = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 
         private static final String[] PROJECTION = {
             Clocks.CITY,
@@ -117,7 +115,6 @@ public class EditClockActivity extends SherlockFragmentActivity {
             Cursor c = getActivity().getContentResolver().query(uri, PROJECTION, null, null, null);
             try {
                 c.moveToFirst();
-
                 View view = getView();
                 mCityText = (EditText) view.findViewById(R.id.city_edittext);
                 mCityText.setText(c.getString(c.getColumnIndex(Clocks.CITY)));
@@ -132,15 +129,13 @@ public class EditClockActivity extends SherlockFragmentActivity {
                 String id = c.getString(c.getColumnIndex(Clocks.TIMEZONE_ID));
                 Timezone tz = Timezone.of(id);
                 Moment moment = PlatformClock.INSTANCE.currentTime();
-                ((TextView) view.findViewById(R.id.time_zone_name)).setText(
-                        TimeZoneInfo.getDescription(tz, moment));
-                ((TextView) view.findViewById(R.id.time_zone_details)).setText(
-                        TimeZoneInfo.getTimeDifferenceString(tz, moment));
+                ((TextView) view.findViewById(R.id.time_zone_name)).setText(TimeZoneInfo.getDescription(tz, moment));
+                ((TextView) view.findViewById(R.id.time_zone_details)).setText(TimeZoneInfo.getTimeDifferenceString(tz, moment));
 
-                if (SANS_ICE_CREAM) {
+                //if (SANS_ICE_CREAM) {
                     // capitalize text of the checkbox - pre ics does not support textAllCaps.
                     mUseInWidgetCheckBox.setText(mUseInWidgetCheckBox.getText().toString().toUpperCase());
-                }
+               // }
             } catch (CursorIndexOutOfBoundsException e) {
                 // item is not in the database any more
                 this.getActivity().finish();

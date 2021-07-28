@@ -12,7 +12,7 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/Theme.Sherlock"
+        android:theme="@style/Widget.AppCompat.ActionBar"
         android:name=".MyApp" >
 
         <!-- clock widget -->
@@ -105,7 +105,7 @@
         <!-- activities -->
         <activity
             android:name=".WorldClockActivity"
-            android:label="@string/activity_title" >
+            android:label="@string/activity_title">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -114,12 +114,14 @@
         </activity>
         <activity
             android:name=".AddClockActivity"
+            android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar"
             android:exported="false" />
         <activity
             android:name=".EditClockActivity"
             android:exported="false" />
         <activity
             android:name=".WorldClockPreferenceActivity"
+            android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar"
             android:exported="false" />
 
         <!-- compatibility weather widgets -->
